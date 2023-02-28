@@ -15,6 +15,6 @@ urlpatterns = [
     path("feedback/", ContactView.as_view()),
     path('register/', RegisterView.as_view()),    
     path('profile/', ProfileView.as_view()),    
-    path("comments/", CommentView.as_view()),
-    path("comments/<slug:post_slug>/", CommentView.as_view()),
+    path("comments/", AddCommentView.as_view()),
+    path("comments/<slug:post_slug>/", GetCommentsView.as_view()),
 ]

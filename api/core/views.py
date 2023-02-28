@@ -1,3 +1,4 @@
+import os
 from rest_framework import permissions, pagination, generics, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,7 +9,7 @@ from .models import *
 
 
 class PageNumberSetPagination(pagination.PageNumberPagination):
-    page_size = 2
+    page_size = 6
     page_size_query_param = 'page_size'
     ordering = 'created_at'
 
@@ -16,7 +17,7 @@ class PageNumberSetPagination(pagination.PageNumberPagination):
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
-    search_fields = ['content', 'h1']
+    search_fields = ['content', 'h1', 'description']
     filter_backends = (filters.SearchFilter,)
     lookup_field = 'slug'
     permission_classes = [permissions.AllowAny]
@@ -58,7 +59,7 @@ class ContactView(APIView):
             from_email = data.get('email')
             subject = data.get('subject')
             message = data.get('message')
-            send_mail(f'From {name} | {subject}', f"{message}\n\nSender's email: {from_email}", from_email, ['amromashov@gmail.com'])
+            send_mail(f'From {name} | {subject}', f"{message}\n\nSender's email: {from_email}", from_email, [os.getenv('EMAIL_HOST_USER')])
             return Response({"success": "Sent"})
 
 
@@ -86,10 +87,16 @@ class ProfileView(generics.GenericAPIView):
         })
 
 
-class CommentView(generics.ListCreateAPIView):
+class AddCommentView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+
+class GetCommentsView(generics.ListAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self):
         post_slug = self.kwargs['post_slug'].lower()
